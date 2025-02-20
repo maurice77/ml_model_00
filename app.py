@@ -164,9 +164,7 @@ def auto_predict():
         "Petal Width": features[0, 3]
     }
 
-    print('hola')
     print(jsonify({'input_data': input_data, 'prediction': predicted_class}))
-    print('chao')
     return jsonify({'input_data': input_data, 'prediction': predicted_class})
 
 

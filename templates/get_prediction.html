@@ -9,10 +9,16 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            display: flex;
+            justify-content: space-between;
+            background-image: url("{{ url_for('static', filename='iris_background.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
         .container {
-            max-width: 600px;
-            margin: auto;
+            width: 45%;
         }
         .form-group {
             margin-bottom: 15px;
@@ -41,6 +47,25 @@
         }
         .result img {
             max-width: 100%;
+        }
+        .spinner {
+            display: none;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #007BFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #results-container {
+            position: relative;
         }
     </style>
 </head>
@@ -75,11 +100,14 @@
             <button onclick="predict()">Predict</button>
             <button onclick="reset()" style="background-color: red;">Reset</button>
         </div>
+    </div>
+    <div class="container" id="results-container">
         <div class="result" id="result"></div>
+        <div class="spinner" id="spinner"></div>
+        <div class="result" id="plot"></div>
     </div>
 
     <script>
-
         const public_ip = '18.222.164.79';
 
         function reset() {
@@ -88,6 +116,7 @@
             document.getElementById('petal_length').value = '';
             document.getElementById('petal_width').value = '';
             document.getElementById('result').innerHTML = '';
+            document.getElementById('plot').innerHTML = '';
         }
 
         async function predict() {
@@ -98,54 +127,81 @@
             const petalLength = document.getElementById('petal_length').value;
             const petalWidth = document.getElementById('petal_width').value;
 
+            // Show spinner
+            document.getElementById('spinner').style.display = 'block';
+
             // Login to get JWT token
-            const loginResponse = await fetch(`http://${public_ip}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
+            try {
 
-            const loginData = await loginResponse.json();
-            const token = loginData.access_token;
+                const loginResponse = await fetch(`http://${public_ip}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
 
-            // Post data for prediction
+                if (!loginResponse.ok) {
+                    throw new Error('Login failed');
+                }
 
-            const predictResponse = await fetch(`http://${public_ip}/predict`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    features: [ sepalLength, sepalWidth, petalLength, petalWidth]
-                })
-            });
+                const loginData = await loginResponse.json();
+                const token = loginData.access_token;
 
-            const predictData = await predictResponse.json();
+                // Post data for prediction
+                const predictResponse = await fetch(`http://${public_ip}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        features: [sepalLength, sepalWidth, petalLength, petalWidth]
+                    })
+                });
 
-            // Display the result
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `
-                <h2>Prediction Result</h2>
-                <p><strong>Prediction:</strong> ${predictData.prediction}</p>
-                <p><strong>Input Data:</strong></p>
-                <ul>
-                    <li>Sepal Length: ${predictData.input_data['Sepal Length']}</li>
-                    <li>Sepal Width: ${predictData.input_data['Sepal Width']}</li>
-                    <li>Petal Length: ${predictData.input_data['Petal Length']}</li>
-                    <li>Petal Width: ${predictData.input_data['Petal Width']}</li>
-                </ul>`;
+                if (!predictResponse.ok) {
+                    throw new Error('Prediction failed');
+                }
+
+                const predictData = await predictResponse.json();
+
+                // Display the result
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <h2>Prediction Result</h2>
+                    <p><strong>Prediction:</strong> ${predictData.prediction}</p>
+                    <p><strong>Input Data:</strong></p>
+                    <ul>
+                        <li>Sepal Length: ${predictData.input_data['Sepal Length']}</li>
+                        <li>Sepal Width: ${predictData.input_data['Sepal Width']}</li>
+                        <li>Petal Length: ${predictData.input_data['Petal Length']}</li>
+                        <li>Petal Width: ${predictData.input_data['Petal Width']}</li>
+                    </ul>
+                `;
 
                 // Add a delay before displaying the plot
                 setTimeout(() => {
-                    resultDiv.innerHTML += `
-                        <h2>Plot</h2>
-                        <img src='http://${public_ip}/plot' alt="Plot">
-                    `;
-                }, 2000); // 2-second delay
+                    updatePlot();
+                }, 200); // 0.2-second delay
 
+            } catch (error) {
+                // Display error message
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            } finally {
+                // Hide spinner
+                document.getElementById('spinner').style.display = 'none';
+            }
+
+        }
+
+        function updatePlot() {
+            const plotDiv = document.getElementById('plot');
+            plotDiv.innerHTML = `
+                <h2>Plot</h2>
+                <img src='http://${public_ip}/plot?${new Date().getTime()}' alt="Plot">
+            `;
         }
     </script>
 </body>
