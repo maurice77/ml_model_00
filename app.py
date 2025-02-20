@@ -12,7 +12,6 @@ import os
 import random
 
 API_USERS = {
-    'maurice':'hola',
     'user':'pass',
 }
 
