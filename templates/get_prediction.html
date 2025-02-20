@@ -57,22 +57,23 @@
         </div>
         <div class="form-group">
             <label for="sepal_length">Sepal Length</label>
-            <input type="number" id="sepal_length" placeholder="Enter sepal length">
+            <input type="text" id="sepal_length" placeholder="Enter sepal length" step="0.1">
         </div>
         <div class="form-group">
             <label for="sepal_width">Sepal Width</label>
-            <input type="number" id="sepal_width" placeholder="Enter sepal width">
+            <input type="text" id="sepal_width" placeholder="Enter sepal width" step="0.1">
         </div>
         <div class="form-group">
             <label for="petal_length">Petal Length</label>
-            <input type="number" id="petal_length" placeholder="Enter petal length">
+            <input type="text" id="petal_length" placeholder="Enter petal length" step="0.1">
         </div>
         <div class="form-group">
             <label for="petal_width">Petal Width</label>
-            <input type="number" id="petal_width" placeholder="Enter petal width">
+            <input type="text" id="petal_width" placeholder="Enter petal width" step="0.1">
         </div>
         <div class="form-group">
             <button onclick="predict()">Predict</button>
+            <button onclick="reset()" style="background-color: red;">Reset</button>
         </div>
         <div class="result" id="result"></div>
     </div>
@@ -80,6 +81,14 @@
     <script>
 
         const public_ip = '18.222.164.79';
+
+        function reset() {
+            document.getElementById('sepal_length').value = '';
+            document.getElementById('sepal_width').value = '';
+            document.getElementById('petal_length').value = '';
+            document.getElementById('petal_width').value = '';
+            document.getElementById('result').innerHTML = '';
+        }
 
         async function predict() {
             const username = document.getElementById('username').value;
@@ -102,6 +111,7 @@
             const token = loginData.access_token;
 
             // Post data for prediction
+
             const predictResponse = await fetch(`http://${public_ip}/predict`, {
                 method: 'POST',
                 headers: {
@@ -109,7 +119,7 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    features: [sepalLength, sepalWidth, petalLength, petalWidth]
+                    features: [ sepalLength, sepalWidth, petalLength, petalWidth]
                 })
             });
 
@@ -126,10 +136,16 @@
                     <li>Sepal Width: ${predictData.input_data['Sepal Width']}</li>
                     <li>Petal Length: ${predictData.input_data['Petal Length']}</li>
                     <li>Petal Width: ${predictData.input_data['Petal Width']}</li>
-                </ul>
-                <h2>Plot</h2>
-                <img src='http://${public_ip}/plot' alt="Plot">
-            `;
+                </ul>`;
+
+                // Add a delay before displaying the plot
+                setTimeout(() => {
+                    resultDiv.innerHTML += `
+                        <h2>Plot</h2>
+                        <img src='http://${public_ip}/plot' alt="Plot">
+                    `;
+                }, 2000); // 2-second delay
+
         }
     </script>
 </body>

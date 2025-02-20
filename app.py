@@ -55,6 +55,7 @@ def generate_plot(features, features_pca, predicted_class):
         )
 
     # Highlight the predicted point
+    print(f"Plotting predicted point: {features_pca[0]}")  # Debug print
     ax.scatter(
         features_pca[0, 0], features_pca[0, 1], features_pca[0, 2],
         color='red', s=300, label='Predicted Point', edgecolor='w'
@@ -122,7 +123,9 @@ def login():
 def predict():
     data = request.get_json(force=True)
     features = np.array(data['features']).reshape(1, -1)
+    print(f"Features: {features}")  # Debug print
     features_pca = pca.transform(features)
+    print(f"Features PCA: {features_pca}")  # Debug print
     prediction = model.predict(features_pca)
     predicted_class = iris.target_names[prediction[0]]
 
@@ -161,7 +164,11 @@ def auto_predict():
         "Petal Width": features[0, 3]
     }
 
+    print('hola')
+    print(jsonify({'input_data': input_data, 'prediction': predicted_class}))
+    print('chao')
     return jsonify({'input_data': input_data, 'prediction': predicted_class})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
