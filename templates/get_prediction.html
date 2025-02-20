@@ -11,7 +11,8 @@
             margin: 20px;
             display: flex;
             justify-content: space-between;
-            background-image: url("{{ url_for('static', filename='iris_background.jpg') }}");
+            background-image: url('http://18.222.164.79/static/iris_background.jpg');
+            /*background-image: url("{{ url_for('static', filename='iris_background.jpg') }}");*/
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -26,6 +27,9 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
+            color: #000; /* Black color for better contrast */
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7); /* White shadow for better readability */
         }
         .form-group input {
             width: 100%;
@@ -38,28 +42,33 @@
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 4px;
         }
         .form-group button:hover {
             background-color: #0056b3;
         }
-        .result {
+        .result, .plot {
             margin-top: 20px;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
         }
         .result img {
             max-width: 100%;
         }
-        .spinner {
+        .spinner-wrapper {
             display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: #007BFF;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -81,19 +90,19 @@
             <input type="password" id="password" placeholder="Enter password">
         </div>
         <div class="form-group">
-            <label for="sepal_length">Sepal Length</label>
+            <label for="sepal_length">Sepal Length (4.3 - 7.9 cm)</label>
             <input type="text" id="sepal_length" placeholder="Enter sepal length" step="0.1">
         </div>
         <div class="form-group">
-            <label for="sepal_width">Sepal Width</label>
+            <label for="sepal_width">Sepal Width (2.0 - 4.4 cm)</label>
             <input type="text" id="sepal_width" placeholder="Enter sepal width" step="0.1">
         </div>
         <div class="form-group">
-            <label for="petal_length">Petal Length</label>
+            <label for="petal_length">Petal Length (1.0 - 6.9 cm)</label>
             <input type="text" id="petal_length" placeholder="Enter petal length" step="0.1">
         </div>
         <div class="form-group">
-            <label for="petal_width">Petal Width</label>
+            <label for="petal_width">Petal Width (0.1 - 2.5 cm)</label>
             <input type="text" id="petal_width" placeholder="Enter petal width" step="0.1">
         </div>
         <div class="form-group">
@@ -103,7 +112,9 @@
     </div>
     <div class="container" id="results-container">
         <div class="result" id="result"></div>
-        <div class="spinner" id="spinner"></div>
+        <div class="spinner-wrapper" id="spinner-wrapper">
+            <div class="spinner" id="spinner"></div>
+        </div>
         <div class="result" id="plot"></div>
     </div>
 
@@ -122,13 +133,13 @@
         async function predict() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const sepalLength = document.getElementById('sepal_length').value;
-            const sepalWidth = document.getElementById('sepal_width').value;
-            const petalLength = document.getElementById('petal_length').value;
-            const petalWidth = document.getElementById('petal_width').value;
+            const sepalLength = parseFloat(document.getElementById('sepal_length').value).toFixed(1);
+            const sepalWidth = parseFloat(document.getElementById('sepal_width').value).toFixed(1);
+            const petalLength = parseFloat(document.getElementById('petal_length').value).toFixed(1);
+            const petalWidth = parseFloat(document.getElementById('petal_width').value).toFixed(1);
 
             // Show spinner
-            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('spinner-wrapper').style.display = 'block';
 
             // Login to get JWT token
             try {
@@ -170,7 +181,7 @@
                 const resultDiv = document.getElementById('result');
                 resultDiv.innerHTML = `
                     <h2>Prediction Result</h2>
-                    <p><strong>Prediction:</strong> ${predictData.prediction}</p>
+                    <p><strong>Prediction:</strong> <span style="color:purple;font-weight:bold;font-size:1.2em;background-color:lightskyblue;border-radius:4px;padding:5px;">${predictData.prediction}</span></p>
                     <p><strong>Input Data:</strong></p>
                     <ul>
                         <li>Sepal Length: ${predictData.input_data['Sepal Length']}</li>
