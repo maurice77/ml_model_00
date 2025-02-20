@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import joblib
 import numpy as np
@@ -9,6 +9,11 @@ from sklearn.datasets import load_iris
 from datetime import timedelta
 import os
 import random
+
+API_USERS = {
+    'maurice':'hola',
+    'user':'pass',
+}
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this to a random secret key
@@ -87,11 +92,23 @@ def generate_plot(features, features_pca, predicted_class):
     plt.savefig(plot_path)
     plt.close()
 
+@app.route('/get_prediction')
+def get_prediction():
+    return render_template('get_prediction.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get('username', None)
     password = request.json.get('password', None)
-    if username != 'admin' or password != 'password':  # Replace with your own authentication logic
+
+    st_error = False
+    if username not in API_USERS:
+        st_error = True
+    else:
+        if API_USERS[username] != password:
+            st_error = True
+
+    if st_error:    
         return jsonify({"msg": "Bad username or password"}), 401
 
     access_token = create_access_token(identity=username)
