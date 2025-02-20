@@ -161,4 +161,4 @@ def auto_predict():
     return jsonify({'input_data': input_data, 'prediction': predicted_class})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
