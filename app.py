@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_file, render_template
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_cors import CORS
 import joblib
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,6 +17,8 @@ API_USERS = {
 }
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS
+
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this to a random secret key
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=60)  # Set token expiration time
 jwt = JWTManager(app)

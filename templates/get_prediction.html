@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iris Prediction</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -77,6 +78,9 @@
     </div>
 
     <script>
+
+        const public_ip = '18.222.164.79';
+
         async function predict() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -86,7 +90,7 @@
             const petalWidth = document.getElementById('petal_width').value;
 
             // Login to get JWT token
-            const loginResponse = await fetch('http://your-ec2-public-ip:5000/login', {
+            const loginResponse = await fetch(`http://${public_ip}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -98,7 +102,7 @@
             const token = loginData.access_token;
 
             // Post data for prediction
-            const predictResponse = await fetch('http://your-ec2-public-ip:5000/predict', {
+            const predictResponse = await fetch(`http://${public_ip}/predict`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,7 +128,7 @@
                     <li>Petal Width: ${predictData.input_data['Petal Width']}</li>
                 </ul>
                 <h2>Plot</h2>
-                <img src="http://your-ec2-public-ip:5000/plot" alt="Plot">
+                <img src='http://${public_ip}/plot' alt="Plot">
             `;
         }
     </script>
